@@ -1,0 +1,256 @@
+---
+title: "STAT 4730 Lab 3"
+author: "Ben Lehmann"
+output: pdf_document
+---
+
+# Lab Assignment 3
+
+```{r setup, warning = FALSE, message = FALSE}
+
+library(readr)
+library(dplyr)
+library(tidyr)
+
+```
+
+## Question 1
+
+1. Select a SRS of size 100 from the `agpop.csv` sampling frame with a random
+   seed of `2025`. Remove all rows with missing values in the original sampling frame (Hint:    `drop_na`). 
+   Print the first 5 observations from the sample, including only columns `county`, `state`, `acres92`, `farms92`.
+
+```{r}
+set.seed(2025)
+
+agpop <- read.csv('agpop.csv')
+
+full <- drop_na(agpop)
+
+agpop <- drop_na(agpop)
+
+agpopSample <- agpop %>% sample_n(size = 100)
+
+agpopSample %>% select(county, state, acres92, farms92)
+```
+
+
+## Question 2
+
+2. What is the first-order inclusion probability for each observation in the SRS?
+
+```{r}
+n <- 100
+N <- nrow(agpop)
+pi_i <- n / N
+pi_i
+```
+
+```{r}
+sample_weights <- 1 / pi_i
+sample_weights
+```
+
+
+## Question 3
+
+3. We want to make inference about the average acreage devoted to farms per
+   county in 1992. Write R code to do the following (Hint: only use the selected sample, not    the population data):
+   
+   a. Estimate the mean number of acres per county of farmland in 1992 using the
+   sample created for Question 1 (column `acres92`).
+   
+   b. Estimate the variance of the mean number of acres per county of farmland
+   in 1992 using the sample created for Question 1.
+   
+
+#3a   
+```{r}
+Farm92Mean <- mean(agpopSample$acres92)
+Farm92Mean
+```
+
+
+```{r}
+(sum(agpopSample$acres92))/100
+```
+
+
+```{r}
+(sum(agpopSample$acres92))
+```
+
+
+
+```{r}
+total_acres <- (sum(agpopSample$acres92)*3041)/100
+total_acres
+```
+
+
+```{r}
+tot_92 <- Farm92Mean * N
+print(tot_92)
+```
+
+
+
+```{r}
+sum(full$acres92)
+```
+
+
+```{r}
+mean_92 <- mean(full$acres92)
+mean_92
+```
+
+```{r}
+mean_92*N
+```
+
+
+#3b
+```{r}
+# Estimate variance of the mean
+s2 = (1 / (100 - 1)) * sum((agpopSample$acres92 - Farm92Mean)^2)
+est_var <- 1 / 100 * (1 - 100 / nrow(full)) * s2
+est_var
+```
+
+
+```{r}
+s2_hat <- var(agpopSample$acres92)
+var_mean <- (1/n) * (1 - n/N) * s2_hat
+var_mean
+```
+
+
+
+
+```{r}
+s_2 <- sum((agpopSample$acres92-Farm92Mean)^2)/(100-1)
+s_2
+```
+
+
+## Question 4
+
+4. Use the R function `var()` to estimate the variance of the number of acres
+   per county of farmland in 1992 using the sample created in Question 1. Why is
+   this answer different than your answer in 3.b? What is the difference in the
+   interpretation between the two results? (Hint: What is the estimated variance
+   of a mean in a sample with `N` elements?)
+   
+```{r}
+var_sample <- var(agpopSample$acres92)
+var_sample
+```
+
+S2 and var() are the same, but the estimated variance multiplies our Variance instead.
+The var() function estimates the sample or population variance, which is different from the variance of the mean.
+
+## Question 5
+
+5. Construct a 95\% confidence interval for the mean number of acres per county
+   of farmland in 1992.
+   
+
+```{r}
+se_mean_acres92 <- sqrt(est_var)
+```
+
+```{r}
+c(Farm92Mean + qnorm(0.025) * se_mean_acres92, Farm92Mean + qnorm(0.975) * se_mean_acres92)
+```
+
+```{r}
+c(Farm92Mean - 1.96 * se_mean_acres92, Farm92Mean + 1.96 * se_mean_acres92)
+```
+
+
+## Question 6
+
+6. What is the true value of the population parameter for the mean number of
+   acres per county of farmland in 1992?
+
+   The true value of the population mean number of acres per count of farmland
+   in 1992 can be computed by
+   
+```{r}
+true_mean_acres92 <- mean(full$acres92)
+true_mean_acres92
+```
+
+
+## Question 7
+
+7. We also want to make inference about the proportion of counties that have at
+   least 1000 farms. Estimate the proportion of the number of counties with at
+   least 1000 farms in 1992 and also the standard error. (Hint: define a new indicator         variable.)
+
+
+#Entire Population
+```{r}
+sample_1000 <- agpop %>% mutate(largeFarms = farms92 >= 1000)
+
+est_p <- mean(sample_1000$largeFarms)
+est_p
+```
+
+```{r}
+sum(sample_1000$largeFarms)
+```
+
+
+
+#Population Sample with 100 vals
+```{r}
+samp_1000 <- agpopSample %>% mutate(largeFarms = farms92 > 1000)
+
+estp_val <- mean(samp_1000$largeFarms)
+estp_val
+```
+
+```{r}
+sum(samp_1000$largeFarms)
+```
+
+
+
+```{r}
+N*est_p
+```
+
+
+
+```{r}
+N * estp_val
+```
+
+
+
+
+```{r}
+filterSamp <- filter(agpop, farms92 > 1000)
+
+filterSamp <- na.omit(filterSamp)
+
+estimateP <- mean(filterSamp)
+estimateP
+```
+
+
+
+
+# Further Exploration (required for 573 students only)
+
+1. Order of NA Filtering
+
+What happens if you switch the order of dropping missing data with selecting the
+columns that you need? In other words how does the population size change if you switch the order?
+
+Will the sample remained the same? Which method is more appropriate for this
+analysis?
+
+

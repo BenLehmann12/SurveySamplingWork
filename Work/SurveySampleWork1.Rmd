@@ -1,0 +1,139 @@
+---
+title: "STAT 4730 Lab 1"
+author: "Ben Lehmann"
+output: pdf_document
+---
+
+The following document shows a good way to answer the homework questions.
+
+# Lab 1
+
+Before we answer any question it is good practice to load the required libraries.
+
+```{r load libs}
+
+library(dplyr)
+library(readr)
+library(tidyr)
+
+```
+
+## Question 1
+
+1. Load the `agpop.dat` data set. (It is separated by spaces. Make sure to
+   keep the first row of data points not as column names.) Hint: Look at the help file for `readr::read_delim`.
+
+   Write your answer here
+
+```{r block title}
+
+# Write R code here
+
+# Remember to compile your code use the "knit" button in RStudio or use
+# the rmarkdown::render() function.
+
+agpop <- read_delim("agpop.dat",delim = " ", col_names = FALSE, trim_ws = TRUE)
+
+```
+
+## Question 2
+
+2. Create a character vector with the following names (in this order):
+   county, state, acres92, acres87, acres82, farms92, farms87, farms82,
+   largef92, largef87, largef82, smallf92, smallf87, smallf82, and region.
+   
+```{r}
+column_names <- c(
+  "county", "state", "acres92", "acres87", "acres82", 
+  "farms92", "farms87", "farms82", 
+  "largef92", "largef87", "largef82", 
+  "smallf92", "smallf87", "smallf82", "region"
+)
+```
+
+
+## Question 3
+
+3. Change the names of the `agpop` data set to the names in Question 2. (`names` function)
+
+```{r}
+names(agpop) <- column_names
+agpop
+```
+
+
+## Question 4
+
+4. Keep the following columns in the `agpop` data: county, state, acres92,
+   acres87, and region. Assign this new data frame to another name. (`select` function)
+
+
+```{r}
+agpop_selected <- agpop %>% select(county, state, acres92, acres87, region)
+agpop_selected
+```
+
+
+## Question 5
+
+5. Get the number of observations in the `agpop` data set.
+
+```{r}
+num_observations <- nrow(agpop)
+num_observations
+```
+
+```{r}
+observations_new <- nrow(agpop_selected)
+observations_new
+```
+
+
+## Question 6
+
+6. Remove the observations with the `acres92` less than `acres87` and assign this new data set another name. (`filter` function)
+
+We can filter from the dataset from Question 4 (With only 5 variables)
+```{r}
+agpop_filtered <- agpop_selected %>% 
+  filter(acres92 < acres87)
+
+agpop_filtered
+```
+
+We can also filter from the original Dataset with all 15 variables
+```{r}
+agpop_filter <- agpop %>% 
+  filter(acres92 < acres87)
+
+agpop_filter
+```
+
+Filtered between the two different datasets, still got the same number of rows
+
+## Question 7
+
+7. Get the number of observations in this new smaller data set.
+
+```{r}
+num_filtered_observations <- nrow(agpop_filtered)
+num_filtered_observations
+```
+
+
+## Question 8
+
+8. What do your results tell you about farm sizes between 1987 and 1992?
+
+We can say that after filtering our data we can see that some counties saw a decrease in acres sizes farmed between 1987 and 1992
+
+# Further Exploration Solution (Required for 573 Students Only)
+
+The `agpop.dat` file is a SAS data set. In SAS, the number "-99" is used to
+indicate a missing (`NA`) value. Find the number of observations in the `agpop`
+data set with all of the `NA` values removed.
+
+
+
+
+

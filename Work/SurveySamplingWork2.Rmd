@@ -1,0 +1,112 @@
+---
+title: "STAT 4730 Lab 2"
+author: "Ben Lehmann"
+output: pdf_document
+---
+
+# Lab Assignment 2
+
+Please make sure to insert a code chunk (Ctrl + Alt + I) and write your code in it, **under each question**, if any coding is needed. 
+
+In this assignment we are going to simulate two data sets, merge them together, and conduct a simple analysis.
+
+
+```{r load libraries}
+
+library(dplyr)
+
+```
+
+
+## Question 1
+
+1. Set the seed using `set.seed(2025)`.
+
+```{r}
+
+# Write R code here
+
+# Remember to compile your code use the "knit" button in RStudio or use
+# the rmarkdown::render() function.
+set.seed(2025)
+
+```
+
+## Question 2
+
+2. Create a data frame called `data_1` with the following columns:
+   * `id` - integers that go from 1 to 10
+   * `num1` - 10 numbers that come from a normal distribution with a mean of 0
+     and a standard deviation of 1
+   * `num2` - 10 numbers that come from a normal distribution with a mean of 2
+     and a standard deviation of 3
+   * `num3` - 10 numbers that come from a normal distribution with a mean of 1
+     and a standard deviation of 2.
+
+```{r}
+data_1 <- data.frame(
+  id = 1:10,
+  num1 = rnorm(10, mean = 0, sd = 1),
+  num2 = rnorm(10, mean = 2, sd = 3),
+  num3 = rnorm(10, mean = 1, sd = 2)
+)
+data_1
+```
+
+
+
+## Question 3
+
+3. Create a data frame called `data_2` with the following columns:
+   * `id` - integers that go from 1 to 10
+   * `num4` - 10 numbers that come from a uniform distribution with a minimum
+     of -1 and a max of 1. See the help for `runif`.
+   * `num5` - 10 numbers that come from a uniform distribution with a minimum
+     of 0 and a max of 3.
+     
+
+```{r}
+data_2 <- data.frame(
+  id = 1:10,
+  num4 = runif(10, min = -1, max = 1),
+  num5 = runif(10, min = 0, max = 3)
+)
+data_2
+```
+
+
+## Question 4
+
+4. Join `data_1` and `data_2` and keep all available columns. **Display** the new data.
+
+```{r}
+merged_data <- inner_join(data_1, data_2, by = "id")  #Use inner_join
+merged_data
+```
+
+
+
+## Question 5
+
+5. Find the mean of each of the columns `num1` through `num5` from the data set
+   in Question 4. Do NOT report the mean of the `id` column. (There are multiple
+   ways to correctly solve this problem.)
+   
+```{r}
+column_means <- colMeans(merged_data[, c("num1", "num2", "num3", "num4", "num5")])
+column_means
+```
+
+
+# Further Exploration (Required for 573 Students only)
+
+1. Last week, we worked with data that had been grouped. Can we sample from 
+   grouped data? See if you can sample 1 row from the `starwars` data 
+   set of each unique species.
+
+
+2. If you look at the help function for the built-in `mean` function, it has the
+   option of ignoring `NA` values. How could you update our `mean_fun` so that
+   it can ignore `NA` values? **Test** the result by applying the function to any vector that includes `NA` values.
+
+  
