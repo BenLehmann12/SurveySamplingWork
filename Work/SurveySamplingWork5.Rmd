@@ -1,0 +1,306 @@
+---
+title: "STAT 4730 Lab 5"
+author: "Ben Lehmann"
+output: pdf_document
+---
+
+# Lab Assignment 5
+
+For the lab assignment, we will use quarterly retail sales for Quince County (in
+millions of dollars) during a 10-year time period from 1984-1993.
+
+```{r setup}
+
+library(dplyr)
+library(ggplot2)
+library(readr)
+library(knitr)
+
+```
+
+
+## Question 1
+
+Set the seed to `2025`. Read the file `quince.csv` into R.
+
+```{r}
+set.seed(2025)
+
+quince <- read.csv('quince.csv')
+```
+
+
+## Question 2
+
+Compute the average sales and the total sales for the population.
+
+Also, compute the average sales within each of the 4 quarters.
+
+```{r}
+avg_sales <- mean(quince$sales)
+total_sales <- sum(quince$sales)
+
+avg_sales_by_qtr <- aggregate(sales ~ qtr, data = quince, FUN = mean)
+
+avg_sales
+total_sales
+avg_sales_by_qtr
+```
+
+
+
+## Question 3
+
+Select a sample of size 10, sorting the frame first by `yr` then by `qtr` in an increasing order. Let your random start be `2`.
+
+```{r}
+quince_sorted <- quince[order(quince$yr, quince$qtr),]
+
+start<-sample(1:(nrow(quince) / 10), 1)
+
+sample_indices <- seq(start=2, to=nrow(quince), by = nrow(quince)/10)
+```
+
+```{r}
+sample1 <- quince %>%
+  arrange(yr, qtr) %>%
+  mutate(row_num = row_number()) %>%
+  filter(row_num %in% sample_indices)
+```
+
+
+
+
+## Question 4
+
+With the sample selected in Question 3, calculate the estimated value and estimated standard error of the mean estimator for the variable `sales`. What is your finding of compared to the results from Question 2?
+
+```{r}
+sampl1 <- quince_sorted[sample_indices, ]
+sample_mean <- mean(sample1$sales)
+
+sample_mean
+```
+
+```{r}
+n <- 10
+
+s2 <- sample1 %>%
+  mutate(mean_y = mean(sales)) %>%
+  summarize(s2 = (1 / (n)) * sum((sales - mean_y)^2)) %>%
+  pull(s2)
+
+est_var <- 1 / n * (1 - n / nrow(quince)) * s2
+est_var
+
+sqrt(est_var)
+```
+
+
+
+The average is nearly the same
+
+
+## Question 5
+
+Plot the trend of the sales by `obsno` from the selected sample.
+
+```{r}
+ggplot(sample1, aes(x = obsno, y = sales)) +
+  geom_line() +
+  theme_bw()
+```
+
+
+## Question 6
+
+Select a sample of size 10, sorting the frame first by `qtr` then by `yr`.
+Then repeat Questions 4 and 5 using this new sample. Let your random start be
+`2`.
+
+```{r}
+quince_sorted_qtr <- quince[order(quince$qtr, quince$yr), ]
+
+sample2 <- seq(2, nrow(quince), by = nrow(quince)/10)
+```
+
+
+```{r}
+sample_2 <- quince %>%
+  arrange(qtr, yr) %>%
+  mutate(row_num = row_number()) %>%
+  filter(row_num %in% sample2)
+```
+
+
+
+```{r}
+sampl2 <- quince_sorted_qtr[sample2, ]
+```
+
+```{r}
+sample2_mean <- mean(sample_2$sales)
+sample2_mean
+```
+```{r}
+n <- 10
+
+s_2 <- sample_2 %>%
+  mutate(mean_y = mean(sales)) %>%
+  summarize(s2 = (1 / (n)) * sum((sales - mean_y)^2)) %>%
+  pull(s2)
+
+estvar <- 1 / n * (1 - n / nrow(quince)) * s2
+estvar
+
+sqrt(estvar)
+```
+
+
+```{r}
+ggplot(sample_2, aes(x = obsno, y = sales)) +
+  geom_line() + theme_bw()
+```
+
+
+## Question 7
+
+Create a new column in the population data that is independently drawn from a 
+uniform distribution within 0 and 1. Call this column `rand`.
+
+```{r}
+set.seed(2025)
+
+quince$rand <- runif(nrow(quince))
+```
+
+
+
+## Question 8
+
+Select a systematic sample of size 10, by sorting the frame by `rand`.
+Then repeat Questions 4 and 5 using this new sample. Let your random start be `2`.
+
+```{r}
+sampl3 <- seq(2, nrow(quince), by = nrow(quince)/10)
+
+sample_3 <- quince %>%
+  arrange(rand) %>%
+  mutate(row_num = row_number()) %>%
+  filter(row_num %in% sampl3)
+```
+
+
+
+```{r}
+sample3_mean <- mean(sample_3$sales)
+
+sample3_mean
+```
+```{r}
+n <- 10
+
+s2val <- sample_3 %>%
+  mutate(mean_y = mean(sales)) %>%
+  summarize(s2 = (1 / (n)) * sum((sales - mean_y)^2)) %>%
+  pull(s2)
+
+estivar <- 1 / n * (1 - n / nrow(quince)) * s2
+estivar
+
+sqrt(estivar)
+```
+
+
+## Question 9
+
+Which ordering method do you think is the best for picking a systematic
+random sample and why? (Do NOT say because the estimates are closest to the
+true values.)
+
+I think the best ordering method is by random ordering, because all values are represented
+and that I think we can reduce our bias because of the equal chance we have of picking values.
+
+## Question 10
+
+Which of these three ordering is equivalent to a simple random sample of size
+10 and why?
+
+I would say A simple random sampling,any combination of 10 values from the population has an equal chance of being selected. The order in which the 10 values are chosen does not matte
+
+## Question 11
+
+The following code is a Monte Carlo analysis that is very similar to the
+analysis in Lab 4. It generates 1000 systematic samples according to a random start. However, instead of a histogram resembles to
+a normal distribution, there are only four columns. Why does this make sense for
+systematic sampling?
+
+```{r monte carlo, warning=FALSE, message=FALSE, fig.height=4, fig.width=5}
+
+usgdp <- read_csv("usgdp.csv")
+
+nsim <- 1000
+results <- numeric(nsim)
+
+for (i in 1:nsim) {
+  rand_start <- sample(1:(nrow(usgdp) / 20), 1)
+
+  # Get the observations that we are going to keep
+  seq_to_keep <- seq(from = rand_start, to = nrow(usgdp), by = nrow(usgdp) / 20)
+
+  # Double check that we are keeping the correct number of observations
+  length(seq_to_keep)
+
+  # Select sample
+  results[i] <- usgdp %>%
+    arrange(year, qtr) %>%
+    mutate(row_num = row_number()) %>%
+    filter(row_num %in% seq_to_keep) %>%
+    summarize(mean = mean(us_gdp)) %>%
+    pull(mean)
+}
+
+tibble(res = results) %>%
+  ggplot(aes(x = res)) +
+  geom_histogram(aes(y = ..density..)) +
+  stat_function(fun = dnorm,
+                args = list(mean = mean(results), sd = sd(results))) +
+  geom_vline(xintercept = mean(results), color = "black") +
+  geom_vline(xintercept = mean(usgdp$us_gdp), color = "red") +
+  ggtitle("A Monte Carlo Analysis of USGDP Example") +
+  theme_bw()
+
+```
+
+
+It makes sense because of the sampling methods we are using, we are picking every 10th observation and so we will see gaps in our graphs.Systematic produces clusters instead of doing random sampling in which would produce a histogram with many bars.
+# Further Explanation (Required for 573 students only)
+
+1. Order of `arrange()` Arguments
+
+We need to be careful about the order in which columns are arranged. For example,
+the following are equivalent:
+
+```{r order example}
+
+# Case 1
+usgdp %>%
+  arrange(year, qtr) %>% 
+  head(8) %>% 
+  kable()
+
+# Case 2
+usgdp %>%
+  arrange(qtr) %>%
+  arrange(year) %>% 
+  head(8) %>% 
+  kable()
+
+```
+
+Why is it that these are the same?
+
+2. Variance of Systematic Sampling
+
+Why can't we construct an unbiased estimator of the variance for a systematic
+sample?

@@ -1,0 +1,265 @@
+---
+title: "STAT 4730 Lab 4"
+author: "Ben Lehmann"
+output: pdf_document
+---
+
+# Lab Assignment 4
+
+```{r setup, warning=FALSE, message=FALSE}
+
+# Load libraries
+library(dplyr)
+library(readr)
+library(tidyr)
+library(knitr)
+library(ggplot2)
+
+```
+
+# Question 1
+
+Select a simple random sample of 125 elements from the `agpop0.csv` data set using a seed
+of `999`. Print the first five elements.
+
+```{r}
+set.seed(999)
+
+agpop <- read.csv('agpop0.csv')
+
+ag_sample <- agpop %>% sample_n(size = 125)
+
+head(ag_sample,5)
+```
+
+
+# Question 2
+
+Print the top 3 states with the largest average acres in 1987.
+
+```{r}
+top_states_87 <- ag_sample %>%
+  group_by(state) %>%
+  summarise(average_acres_87 = mean(acres87, na.rm = TRUE)) %>%
+  arrange(desc(average_acres_87))
+
+head(top_states_87,3)
+```
+
+
+# Question 3
+
+We also want to make inference about the proportion of counties that have at
+least 500 farms. Estimate the proportion of the number of counties with at
+least 500 farms and also the standard error.
+
+For 1987
+```{r}
+proportion <- ag_sample %>% mutate(farms500 = farms87 >= 500)
+
+est_prop <- mean(proportion$farms500)
+est_prop
+```
+
+```{r}
+var_p <- 1 / 125 * (1 - 125 / nrow(agpop)) * (125 / (125 - 1)) * est_prop *(1 - est_prop)
+sqrt(var_p)
+```
+
+
+
+For 1992
+```{r}
+propn <- ag_sample %>% mutate(farms500 = farms92 >= 500)
+
+est_props <- mean(propn$farms500)
+est_props
+```
+
+
+```{r}
+vars_p <- 1 / 125 * (1 - 125 / nrow(agpop)) * (125 / (125 - 1)) * est_props *(1 - est_props)
+sqrt(vars_p)
+```
+```{r}
+N <- nrow(agpop)  
+est_props*N
+```
+
+```{r}
+porp_s2 <- propn %>%
+  mutate(mean_y = mean(smallf92)) %>%
+  summarize(s2 = (1 / (125 - 1)) * sum((smallf92 - mean_y)^2)) %>%
+  pull(s2)
+porp_s2
+```
+
+
+
+For Population
+
+```{r}
+pop_500 <- agpop %>% mutate(farms500 = farms92 >= 500)
+est_pops <- mean(pop_500$farms500)
+est_pops
+```
+
+```{r}
+vari_pop <- 1 / 125 * (1 - 125 / nrow(agpop)) * (125 / (125 - 1)) * est_pops *(1 - est_pops)
+sqrt(vari_pop)
+```
+
+```{r}
+pop_s2 <- pop_500 %>%
+  mutate(mean_y = mean(smallf92)) %>%
+  summarize(s2 = (1 / (125 - 1)) * sum((smallf92 - mean_y)^2)) %>%
+  pull(s2)
+pop_s2
+```
+
+
+
+# Question 4
+
+We also want to estimate the total number of small farms in the USA in 1992.
+Write code to estimate this total, compute this variance of the estimate and
+record a **90\%** confidence interval.
+
+```{r}
+prop1992 <- ag_sample %>%
+  mutate(mean_y = mean(smallf92)) %>%
+  summarize(s2 = (1 / (125 - 1)) * sum((smallf92 - mean_y)^2)) %>%
+  pull(s2)
+
+
+```
+
+
+```{r}
+vart <- nrow(agpop)^2 / 125 * (1 - 125 / nrow(agpop)) * s2
+sqrt(vart)
+```
+
+
+```{r}
+N <- nrow(agpop)  
+n <- length(ag_sample$smallf92) 
+1-(n/N)
+```
+
+```{r}
+N/n
+```
+```{r}
+nrow(agpop)^2 / 125 
+```
+
+
+
+```{r}
+s2 <- ag_sample %>%
+  mutate(mean_y = mean(smallf92)) %>%
+  summarize(s2 = (1 / (125 - 1)) * sum((smallf92 - mean_y)^2)) %>%
+  pull(s2)
+
+s2
+
+var_t <- nrow(agpop)^2 / 125 * (1 - 125 / nrow(agpop)) * s2
+var_t
+
+sqrt(var_t)
+
+
+avg <- mean(ag_sample$smallf92)
+t_hats <- nrow(agpop) * avg
+
+t_hats
+
+c(t_hats - qnorm(0.95) * sqrt(var_t),
+  t_hats + qnorm(0.95) * sqrt(var_t))
+
+
+```
+
+
+```{r}
+sqrt((s2/125)*(1-125/3041))
+```
+
+
+# Question 5
+
+In the previous lab, we used the `mean()` function to estimate the average
+number of small farms per county using the
+expression `mean(sample$smallf92)`. Why can we not estimate the total number of
+small farms in the USA, $\hat T$,
+using the expression `sum(sample$smallf92)`? (If you are unsure, look at the
+output of the code and compare it to the actual sum.)
+
+The sum(sample$smallf92) expression only sums up the values in the sample, not the entire population. To estimate the total number of small farms, we need to consider the entire population data or use appropriate estimation techniques.
+
+# Question 6
+
+What is the true actual value of the total number of small farms in the USA in
+1992? Does this value fall in the 90\% confidence interval from Question 3?
+What does this mean about the procedure conducted in Question 3?
+
+```{r}
+avg_1992 <- mean(ag_sample$smallf92)
+total <- avg_1992 * nrow(agpop)
+total
+```
+
+```{r}
+sum(agpop$smallf92)
+```
+
+
+
+Yes the value is in the interval, because of this, our estimation method is accurate.
+
+# Question 7
+
+Conduct a Monte Carlo analysis of your procedure for the estimated total and
+display the histogram of estimated totals of small farms in the USA in 1992.
+For this analysis use 10,000 Monte Carlo simulations with a sample size of 125. Report the distribution and the mean of Monte Carlo estimates. Does the Monte Carlo mean align with the true value?
+
+We can see that the distribution is skewed in a more positive manor and is not normal distribution. I would say that the Monte Carlo mean does seem to align with the true value.
+
+```{r}
+nsim <- 10000
+nsamp <- 125
+results <- numeric(nsim)
+
+for (i in 1:nsim) {
+  results[i] <- agpop %>%
+    sample_n(nsamp) %>%
+    summarize(mean = mean(smallf92)) %>%
+    mutate(tot = mean * nrow(agpop)) %>%
+    pull(tot)
+}
+
+tibble(res = results) %>%
+  ggplot(aes(x = res)) +
+  geom_histogram(aes(y = ..density..)) +
+  stat_function(fun = dnorm,
+                args = list(mean = mean(results), sd = sd(results))) +
+  geom_vline(xintercept = mean(results), color = "black", linetype = 5) +
+  geom_vline(xintercept = sum(agpop$smallf92), color = "red", linetype = 2) +
+  geom_vline(xintercept = t_hats, color = "blue") +
+  theme_minimal()
+```
+
+
+```{r}
+mean(results)
+```
+
+# Further Exploration (required for 573 students only)
+
+1. Sample Size of N
+
+Suppose that instead of taking a sample size of 125 elements in Question 1, we
+take a sample size same as the population size. What is the variance of the estimate
+of the total number of small farms in the USA in 1992. Why does this number make
+sense?

@@ -1,0 +1,227 @@
+---
+title: "Lab 7: Template"
+author: "Ben Lehmann"
+output: pdf_document
+---
+
+# Lab Assignment 7
+
+For this assignment we will use the `aaup2.csv` file. Suppose researches at Iowa
+State University want to estimate the total number of full professors at US
+colleges and the average number of full professors per college and compare these
+Iowa parameters to the rest of the US.
+
+The `aaup2.csv` data set has the following column names:
+
+Column Name | Meaning
+----------- | -------
+FICE | federal ID number
+name | college name
+state | State abbreviation
+fullsal | average salary for full professors
+assosal | average salary for associate professors
+assisal | average salary for assistant professors
+allsal  | average salary for all ranks
+**numfull** | number of full professors
+numasso | number of associate professors
+numassi | number of assistant professors
+numinst | number of instructors
+numfac  | number of all faculty
+**region**  | state region (either "east", "iowa", or "other")
+
+Since there are only a few colleges in our sampling frame from Iowa, the
+researchers decide to take **all** of them into the sample. Then they decide to take
+a **20\%** sample from the East and a **10\%** sample from the rest of the US.
+
+```{r libs, message = FALSE, warning = FALSE}
+library(dplyr)
+library(purrr)
+library(readr)
+library(tidyr)
+library(knitr)
+```
+
+
+
+```{r}
+data <- read.csv('aaup2.csv')
+```
+
+```{r}
+region_counts <- data %>%
+  group_by(region) %>%
+  summarise(n = n())
+```
+
+
+# Question 1
+
+Calculate the number of universities within each `state`, that spend more salaries for all full professors than for all associate professors. Print the top 5 states with the highest number of such universities. (Hint: the salaries are calculated by the number of professors times the average salary, for each rank.)
+
+```{r}
+newData <- data %>%
+  mutate(
+    full_prof_salary = fullsal * numfull,
+    assoc_prof_salary = assosal * numasso
+  )
+filtered <- newData %>% filter(full_prof_salary > assoc_prof_salary)
+
+state_counts <- filtered %>%
+  group_by(state) %>%
+  summarise(count_universities = n()) %>%
+  arrange(desc(count_universities))
+
+head(state_counts, 5)
+```
+
+
+# Question 2
+
+Set the seed to `20250313`. Select a stratified sample, with `region` being the 
+stratification variable, that fits the description desired by the researchers above. **Round UP** the sample size for each stratum to the nearest integer. 
+
+```{r}
+set.seed(20250313)
+
+sample_sizes <- tibble(region = c("east", "other","iowa"),
+                     samp_size = c(64,82,27))
+```
+
+
+```{r}
+sample <- data %>%
+  left_join(sample_sizes, by = "region") %>%
+  group_split(region) %>%
+  map_dfr(~ sample_n(.x, unique(.x$samp_size), replace = FALSE))
+```
+
+
+# Question 3
+
+Estimate the total number of full professors in the US and the associated
+standard error.
+
+```{r}
+strata_counts <- data %>%
+  group_by(region) %>%
+  summarize(strata_N = n()) %>%
+  ungroup()
+```
+
+
+```{r}
+strata_count <- sample %>%
+  group_by(region) %>%
+  summarize(strata_N = n()) %>%
+  ungroup()
+```
+
+
+
+
+```{r}
+sample %>%
+  group_by(region) %>%
+  summarize(strata_mean = mean(numfull)) %>%
+  ungroup() %>%
+  left_join(strata_counts, by = c("region")) %>%
+  mutate(strata_est_tot = strata_N * strata_mean) %>%
+  summarize(pop_tot = sum(strata_est_tot))
+```
+
+```{r}
+sample %>%
+  group_by(region) %>%
+  summarize(strata_mean = mean(numfull)) %>%
+  ungroup() %>%
+  left_join(strata_counts, by = c("region")) %>%
+  mutate(strata_est_tot = strata_N * strata_mean)
+```
+
+
+
+```{r}
+pop_total <- sample %>%
+  group_by(region) %>%
+  summarize(strata_mean = mean(numfull)) %>%
+  ungroup() %>%
+  left_join(strata_counts, by = c("region")) %>%
+  mutate(strata_est_tot = strata_N * strata_mean) %>%
+  summarize(pop_tot = sum(strata_est_tot))
+
+pop_mean <- as.numeric(pop_total) / nrow(data)
+pop_mean
+```
+```{r}
+sh2_df <- sample %>%
+  group_by(region) %>%
+  summarize(sh2 = 1 / (n() - 1) * sum((numfull - mean(numfull))^2)) %>%
+  ungroup()
+sh2_df
+```
+
+
+```{r}
+est_var <- left_join(sh2_df, sample_sizes, by = c("region")) %>%
+  left_join(strata_counts, by = c("region")) %>%
+  mutate(strata_tot = strata_N^2 / samp_size * (1 - samp_size / strata_N) * sh2) %>%
+  summarize(est_var_tot = sum(strata_tot)) %>%
+  pull(est_var_tot)
+est_var
+```
+```{r}
+sqrt(est_var)
+```
+
+```{r}
+left_join(sh2_df, sample_sizes, by = c("region")) %>%
+  left_join(strata_counts, by = c("region")) %>%
+  mutate(strata_tot = strata_N^2 / samp_size * (1 - samp_size / strata_N) * sh2) 
+```
+
+
+# Question 4
+
+Estimate the total number of full professors in each of the three stratum and the associated standard errors. (Hint: Use the formula for SRS.)
+
+What is the relationship between the standard errors of the three stratum estimates and the standard error of the overall estimate?
+
+`
+```{r}
+iowa <- sample %>% filter(region=="iowa")
+other <- sample %>% filter(region=="other")
+east <- sample %>% filter(region == "east")
+
+mean(iowa$numfull) * nrow(iowa)
+s2_iowa <- iowa %>% mutate(mean_y = mean(numfull)) %>% summarize(s2 = (1/26)*sum((numfull-mean_y)^2)) %>% pull(s2)
+
+var_iowa = 27^2 / 27 * (1-27/27)*s2_iowa
+sqrt(var_iowa)
+
+
+
+mean(east$numfull) * nrow(east)
+s2_east <- east %>% mutate(mean_y = mean(numfull)) %>% summarize(s2 = (1/64)*sum((numfull-mean_y)^2)) %>% pull(s2)
+
+var_east <- 317^2/64 * (1-64/317)*s2_east
+sqrt(var_east)
+
+mean(other$numfull) * nrow(other)
+s2_other <- other %>% mutate(mean_y = mean(numfull)) %>% summarize(s2 = (1/82)*sum((numfull-mean_y)^2)) %>% pull(s2)
+
+var_other <- 814^2/82 * (1-82/814)*s2_other
+sqrt(var_other)
+
+
+```
+
+
+# Question 5
+
+For which of the three stratum estimates (region "east", "iowa", or "other")
+will the estimated value remain the same when a different
+random sample is drawn? Why?
+
+I believe Iowa because we decided to use all of the Iowa data instead of picking a percentage, because of this, Iowa will stay the same no matter what. Others and East I believe will change because of proportion picked.
+
+

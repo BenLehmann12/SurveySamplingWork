@@ -1,0 +1,135 @@
+---
+title: "STAT 4730 Lab 6"
+author: "Ben Lehmann"
+output: pdf_document
+---
+
+# Lab Assignment 6
+
+For this assignment we use the `anthrop.csv` data to try to estimate the total
+length of criminals left middle finger from their height.
+
+```{r setup}
+
+library(ggplot2)
+library(dplyr)
+library(readr)
+
+```
+
+
+## Question 1
+
+Read in the `anthrop.csv` data. Set the seed to `2025`.
+
+```{r}
+set.seed(2025)
+
+anthrop <- read.csv('anthrop.csv')
+```
+
+
+## Question 2
+
+Select a probability proportional to size sample of size 150. Use height as
+the size variable. Add a new column that contains the selection probability.
+
+
+```{r}
+sample <- sample_n(anthrop, 150, replace = TRUE, weight = height) %>%
+mutate(p = height / sum(anthrop$height))
+
+head(sample)
+```
+
+
+## Question 3
+
+If there is one unit in the population with a selection probability of 0.01, what is the probability that it is included in the PPS sample of size 150?
+
+```{r}
+1-((1-0.01)^150)
+```
+
+
+## Question 4
+
+Estimate the population *mean* of the variable *finger*, as the length of criminals left middle finger.
+
+
+```{r}
+That <- sample %>% mutate(rat = finger / p) %>% pull(rat) %>% mean()
+est_mean <- That / nrow(anthrop)
+est_mean
+
+```
+
+
+
+
+
+## Question 5
+
+Estimate the variance of the mean length of criminals left middle finger.
+
+```{r}
+est_var_tot <- sample %>% mutate(rat = finger / p) %>% mutate(ind_var = (rat - That)^2) %>% pull(ind_var) %>% sum() / ((150 - 1) * 150)
+est_var_tot
+```
+
+
+```{r}
+est_var_mean <- est_var_tot / (nrow(anthrop)^2)
+est_var_mean
+```
+
+
+## Question 6
+
+Create a 95\% confidence interval for the population mean length of criminals
+left middle finger.
+
+```{r}
+c(est_mean - qnorm(0.975) * sqrt(est_var_mean),
+est_mean + qnorm(0.975) * sqrt(est_var_mean))
+```
+
+
+## Question 7
+
+Create a plot to check the effectiveness of using `height` as a size
+variable. (Hint: Do NOT directly put `height` on either the x or y axis, use the inclusion probability instead.) Calculate the correlation between `finger` and `height` in the population. Comment on
+the effectiveness of `height` as a size variable.
+
+
+Looking at our correlation, from the graph and the value, we can say that there is a Moderate positive relationship between Height and Finger, now if we had other variables we can try with them and see if we get a more higher correlation value. 0.65 is good for a correlation. Height is moderately effective in terms of impact which is still good, but like I said, can we find better variables that could increase our correlation, I think so.
+
+```{r}
+correlation <- cor(anthrop$finger, anthrop$height)
+correlation
+```
+
+```{r}
+ggplot(sample, aes(x=p, y=finger)) + geom_point() + theme_minimal()
+```
+
+
+
+## Question 8
+
+Create a plot to check for outliers. Comment on how outliers might affect the
+outcome.
+
+Outliers have an impact the skewness of our graph, this also impacts our variance, our mean,
+the probability proportion, estimation and confidence intervals. Our variability in the graph might be inflated or deflated. If we remove our outliers,we could shrink the gap in our graph. The results might shrink or increase depending on how many outliers we remove. 
+
+```{r}
+sample %>%
+  mutate(res = finger / p) %>%
+  ggplot(aes(x = res)) +
+  geom_histogram() +
+  geom_vline(xintercept = sum(anthrop$finger), color = "red") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme_minimal()
+```
+
