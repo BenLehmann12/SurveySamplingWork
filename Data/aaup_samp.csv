@@ -1,0 +1,51 @@
+FICE,name,state,fullsal,assosal,assisal,allsal,numfull,numasso,numassi,numinst,numfac,region,M_i
+1385,Fairfield University,CT,685,545,452,545,62,43,81,6,192,east,16
+1426,Yale University,CT,928,522,444,708,404,118,191,6,767,east,16
+1406,Southern Conn. State Univ.,CT,644,514,385,522,160,125,120,12,417,east,16
+1424,Wesleyan University,CT,734,504,423,597,128,57,66,0,254,east,16
+1425,Eastern Connecticut St.Univ.,CT,650,515,400,535,47,47,33,0,127,east,16
+1481,Florida Atlantic University,FL,580,426,394,461,183,147,159,30,528,other,19
+1468,St. Thomas University,FL,438,482,351,403,23,22,37,4,90,other,19
+1531,Stetson University,FL,622,437,370,477,61,52,65,2,185,other,19
+1538,University of Tampa,FL,495,425,371,416,36,37,46,4,127,other,19
+1515,Rollins College,FL,542,420,321,457,78,43,26,7,154,other,19
+3970,Parks Coll.of St.Louis Univ.,IL,576,540,396,487,15,12,16,4,47,other,45
+1696,Illinois Wesleyan University,IL,570,452,374,445,32,42,47,8,129,other,45
+1749,Roosevelt University,IL,484,405,359,416,50,58,42,2,152,other,45
+1710,Loyola Univ. of Chicago,IL,761,536,433,570,164,230,163,6,563,other,45
+1758,Southern Ill.Univ-Carbondale,IL,564,436,359,422,272,255,313,33,977,other,45
+1795,University of Evansville,IN,500,415,351,414,57,43,58,4,170,other,37
+1801,Hanover College,IN,555,437,377,432,28,16,35,13,92,other,37
+1817,Indiana Univ.-Southeast,IN,529,408,369,422,41,24,42,0,125,other,37
+1834,Calumet College of St.Joseph,IN,324,264,235,265,6,6,9,2,23,other,37
+1842,Valparaiso University,IN,559,423,372,446,67,58,74,5,204,other,37
+2020,Northeast Louisiana Univ.,LA,459,376,325,343,88,102,159,100,449,other,19
+2008,Louisiana Tech University,LA,472,408,344,391,129,93,131,36,389,other,19
+2013,Louisiana St.Univ.Shreveport,LA,458,414,337,385,53,37,48,18,156,other,19
+9636,Southern Univ.A&M Coll.-Main,LA,455,392,336,367,100,88,210,48,446,other,19
+2015,University of New Orleans,LA,512,378,352,404,199,128,116,67,510,other,19
+2106,Univ.of Maryland-Estrn Shore,MD,500,455,388,379,8,33,25,5,113,east,25
+2108,Washington College,MD,496,419,348,443,33,12,15,0,60,east,25
+2065,College of Notre Dame of Md.,MD,443,377,309,362,19,25,29,3,76,east,25
+2067,Columbia Union College,MD,308,297,293,296,17,9,11,5,42,east,25
+2101,U. S. Naval Academy,MD,595,455,377,492,125,100,67,7,299,east,25
+2260,Ferris State University,MI,546,470,409,467,143,160,151,10,477,other,30
+2243,Central Michigan University,MI,588,460,397,490,230,191,137,23,581,other,30
+2318,Spring Arbor College,MI,368,321,284,320,22,15,19,6,62,other,30
+2275,Kalamazoo College,MI,553,440,352,452,36,25,24,7,92,other,30
+2235,Albion College,MI,562,443,346,462,47,27,33,2,109,other,30
+12748,Shawnee State University,OH,510,439,368,411,15,54,35,15,119,other,45
+3051,Kent State Univ.-Kent Campus,OH,654,473,389,502,221,244,203,14,682,other,45
+3084,Muskingum College,OH,446,365,290,353,19,19,28,3,69,other,45
+3045,University of Findlay,OH,417,370,301,330,18,29,51,7,115,other,45
+3143,Wittenberg University,OH,546,413,341,438,49,55,32,6,142,other,45
+3702,Averett College,VA,372,319,281,328,19,15,11,3,48,other,38
+3709,Emory and Henry College,VA,440,358,296,363,18,19,14,3,54,other,38
+3739,Saint Paul's College,VA,319,309,275,290,8,9,8,8,33,other,38
+6968,University of Virginia,VA,777,517,430,610,445,277,201,18,973,other,38
+3719,Longwood College,VA,487,420,336,393,33,50,50,17,150,other,38
+3683,Castleton State College,VT,432,355,302,355,26,27,34,3,90,east,9
+3689,Lyndon State College,VT,433,366,293,366,18,22,17,0,57,east,9
+3691,Middlebury College,VT,678,469,398,512,68,33,56,14,182,east,9
+3696,University of Vermont,VT,606,450,370,458,175,174,115,0,555,east,9
+3692,Norwich University,VT,423,356,297,371,62,51,32,1,146,east,9
